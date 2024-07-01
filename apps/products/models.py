@@ -17,9 +17,7 @@ class Product(Model):
 class ProductCategory(Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    parent_category = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
+    parent_category = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, related_name='child_categories')
 
     def __str__(self):
         return self.name
-
-

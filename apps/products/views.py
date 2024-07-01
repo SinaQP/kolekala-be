@@ -11,7 +11,7 @@ class ProductViewSet(ModelViewSet):
 
 
 class ProductCategoryViewSet(ModelViewSet):
-    queryset = ProductCategory.objects.all()
+    queryset = ProductCategory.objects.filter(parent_category=None)
     serializer_class = ProductCategorySerializer
     filterset_fields = ['name', 'description']
     search_fields = ['name', 'description']
