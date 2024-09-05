@@ -6,11 +6,10 @@ from apps.core.models import Model
 
 class User(AbstractUser):
     username = None
-
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=60, blank=True)
     last_name = models.CharField(max_length=60, blank=True)
-    address = models.TextField(blank=True)
+    phone_number = models.CharField(max_length=15, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -24,7 +23,6 @@ class User(AbstractUser):
             return user
         except IntegrityError as error:
             return error
-
     @classmethod
     def create_superuser(cls, email, password, **kwargs):
         try:
@@ -35,11 +33,10 @@ class User(AbstractUser):
             return error
 
 
-class Role(Model):
-    name = models.CharField(max_length=255)
-    actions = models.ManyToManyField('Action', related_name='roles')
+class Role(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True)
+    permissions = models.ManyToManyField('auth.Permission', blank=True)
 
-
-class Action(Model):
-    name = models.CharField(max_length=255)
-
+    def __str__(self):
+        return self.name
