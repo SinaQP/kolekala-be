@@ -1,7 +1,7 @@
 from rest_framework.urls import path
-from .views import SignupView, LoginView
+from .views import LoginView, RegisterView
 
 urlpatterns = [
-    path("sign-up", SignupView.as_view(), name="sign-up"),
-    path("login", LoginView.as_view(), name="login"),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
 ]
