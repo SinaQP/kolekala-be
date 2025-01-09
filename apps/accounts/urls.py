@@ -1,7 +1,7 @@
-from rest_framework.urls import path
-from .views import LoginView, RegisterView
+from django.urls import path
+from .views import UserRegistrationView, UserLoginView
 
 urlpatterns = [
-    path('register/', RegisterView.as_view(), name='register'),
-    path('login/', LoginView.as_view(), name='login'),
+    path('register/', UserRegistrationView.as_view(), name='register'),
+    path('login/', UserLoginView.as_view(), name='login'),
 ]

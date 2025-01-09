@@ -2,27 +2,20 @@ from django.contrib.auth.base_user import BaseUserManager as DjangoBaseUserManag
 from django.db import models, IntegrityError
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
-from apps.core.models import Model
 
 
 class BaseUserManager(DjangoBaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        """
-        Create and return a regular user with an email and password.
-        """
-        if not email:
-            raise ValueError('The Email field must be set')
+    def create_user(self, phone_number, password=None, **extra_fields):
+        if not phone_number:
+            raise ValueError('The Phone Number field must be set')
 
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        phone_number = self.normalize_phone_number(phone_number)
+        user = self.model(phone_number=phone_number, **extra_fields)
         user.set_password(password)
-        user.save()
+        user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
-        """
-        Create and return a superuser with an email and password.
-        """
+    def create_superuser(self, phone_number, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -31,37 +24,37 @@ class BaseUserManager(DjangoBaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self.create_user(email, password, **extra_fields)
+        return self.create_user(phone_number, password, **extra_fields)
 
 
 class User(AbstractUser):
     username = None
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('email address'), blank=True)
     first_name = models.CharField(max_length=60, blank=True)
     last_name = models.CharField(max_length=60, blank=True)
-    phone_number = models.CharField(max_length=15, blank=True)
+    phone_number = models.CharField(max_length=15, unique=True)
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = []
 
     objects = BaseUserManager()
 
     @classmethod
-    def create_user(cls, email, password, **kwargs):
+    def create_user(cls, phone_number, password, first_name='', last_name='', **kwargs):
         try:
-            user = cls(email=email, **kwargs)
+            user = cls(phone_number=phone_number, first_name=first_name, last_name=last_name, **kwargs)
             user.set_password(password)
-            user.save()
+            user.save(using=cls._db)
             return user
         except IntegrityError as error:
             return error
 
     @classmethod
-    def create_superuser(cls, email, password, **kwargs):
+    def create_superuser(cls, phone_number, password, first_name='', last_name='', **kwargs):
         try:
             kwargs.setdefault('is_staff', True)
             kwargs.setdefault('is_superuser', True)
-            return cls.create_user(email, password, **kwargs)
+            return cls.create_user(phone_number, password, first_name, last_name, **kwargs)
         except IntegrityError as error:
             return error
 

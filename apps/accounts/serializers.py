@@ -1,35 +1,36 @@
-from django.contrib.auth import get_user_model, authenticate
-from django.contrib.auth.password_validation import validate_password
+import re
+
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-
-User = get_user_model()
+from .models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'password')
-        extra_kwargs = {
-            'password': {'write_only': True},
-            'email': {'error_messages': {'unique': 'کاربر با این ایمیل از قبل موجود است.'}}
-        }
-
-    def validate_password(self, value):
-        validate_password(value)
-        return value
+        fields = ['first_name', 'last_name', 'phone_number', 'password']
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        user = User(**validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long.")
+        return value
 
-class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+    @staticmethod
+    def validate_iranian_phone_number(value):
+        pattern = re.compile(r'^(?:\+98|0)?9\d{9}$')
+        if not pattern.match(value):
+            raise serializers.ValidationError("شماره تلفن نامعتبر است. لطفاً شماره تلفن ایرانی معتبری وارد کنید.")
+        return value
 
-    def validate(self, data):
-        user = authenticate(**data)
-        is_user_valid = user and user.is_active
-        if is_user_valid:
-            return user
-        raise ValidationError("اطلاعات نامعتبر است.")
+class UserLoginSerializer(serializers.Serializer):
+    phone_number = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate_phone_number(self, value):
+        return UserRegistrationSerializer.validate_iranian_phone_number(value)

@@ -1,6 +1,11 @@
 from apps.core.views import ModelViewSet
-from .models import Product, ProductCategory
-from .serializers import ProductSerializer, ProductCategorySerializer
+from .models import Product, ProductCategory, Shop
+from .serializers import ProductSerializer, ProductCategorySerializer, ShopSerializer
+
+
+class ShopViewSet(ModelViewSet):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer
 
 
 class ProductViewSet(ModelViewSet):
